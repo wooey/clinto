@@ -5,6 +5,8 @@ import json
 import imp
 import traceback
 import tempfile
+import six
+import copy
 from .ast import source_parser
 from itertools import chain
 
@@ -55,8 +57,6 @@ TYPE_FIELDS = {
     # Python Builtins
     bool: {'model': 'BooleanField', 'type': 'checkbox', 'nullcheck': lambda x: x.default is None,
            'attr_kwargs': GLOBAL_ATTR_KWARGS},
-    file: {'model': 'FileField', 'type': 'file', 'nullcheck': lambda x: False,
-           'attr_kwargs': GLOBAL_ATTR_KWARGS},
     float: {'model': 'FloatField', 'type': 'text', 'html5-type': 'number', 'nullcheck': lambda x: x.default is None,
             'attr_kwargs': GLOBAL_ATTR_KWARGS},
     int: {'model': 'IntegerField', 'type': 'text', 'nullcheck': lambda x: x.default is None,
@@ -65,8 +65,6 @@ TYPE_FIELDS = {
           'attr_kwargs': GLOBAL_ATTR_KWARGS},
     str: {'model': 'CharField', 'type': 'text', 'nullcheck': lambda x: x.default == '' or x.default is None,
           'attr_kwargs': GLOBAL_ATTR_KWARGS},
-    unicode: {'model': 'CharField', 'type': 'text', 'nullcheck': lambda x: x.default == '' or x.default is None,
-              'attr_kwargs': GLOBAL_ATTR_KWARGS},
 
     # argparse Types
     argparse.FileType: {'model': 'FileField', 'type': 'file', 'nullcheck': lambda x: False,
@@ -76,27 +74,41 @@ TYPE_FIELDS = {
                             'upload': {'callback': is_upload}
                         })},
 }
+if six.PY2:
+    TYPE_FIELDS.update({
+        file: {'model': 'FileField', 'type': 'file', 'nullcheck': lambda x: False,
+           'attr_kwargs': GLOBAL_ATTR_KWARGS},
+        unicode: {'model': 'CharField', 'type': 'text', 'nullcheck': lambda x: x.default == '' or x.default is None,
+              'attr_kwargs': GLOBAL_ATTR_KWARGS},
+    })
+elif six.PY3:
+    import io
+    TYPE_FIELDS.update({
+        io.IOBase: {'model': 'FileField', 'type': 'file', 'nullcheck': lambda x: False,
+           'attr_kwargs': GLOBAL_ATTR_KWARGS},
+    })
+
+def update_dict_copy(a, b):
+    temp = copy.deepcopy(a)
+    temp.update(b)
+    return temp
 
 # There are cases where we can glean additional information about the form structure, e.g.
 # a StoreAction with default=True can be different than a StoreTrueAction with default=False
 ACTION_CLASS_TO_TYPE_FIELD = {
-    argparse._StoreAction: dict(TYPE_FIELDS, **{
-
-    }),
-    argparse._StoreConstAction: dict(TYPE_FIELDS, **{
-
-    }),
-    argparse._StoreTrueAction: dict(TYPE_FIELDS, **{
+    argparse._StoreAction: update_dict_copy(TYPE_FIELDS, {}),
+    argparse._StoreConstAction: update_dict_copy(TYPE_FIELDS, {}),
+    argparse._StoreTrueAction: update_dict_copy(TYPE_FIELDS, {
         None: {'model': 'BooleanField', 'type': 'checkbox', 'nullcheck': lambda x: x.default is None,
-               'attr_kwargs': dict(GLOBAL_ATTR_KWARGS, **{
+               'attr_kwargs': update_dict_copy(GLOBAL_ATTR_KWARGS, {
                     'checked': {'callback': lambda x: x.default},
                     'value': None,
                     })
                },
     }),
-    argparse._StoreFalseAction: dict(TYPE_FIELDS, **{
+    argparse._StoreFalseAction: update_dict_copy(TYPE_FIELDS, {
         None: {'model': 'BooleanField', 'type': 'checkbox', 'nullcheck': lambda x: x.default is None,
-               'attr_kwargs': dict(GLOBAL_ATTR_KWARGS, **{
+               'attr_kwargs': update_dict_copy(GLOBAL_ATTR_KWARGS, {
                     'checked': {'callback': lambda x: x.default},
                     'value': None,
                     })
@@ -119,7 +131,7 @@ class ArgParseNode(object):
                 field_type = fields[field_types[0]]
         self.node_attrs = dict([(i, field_type[i]) for i in GLOBAL_ATTRS])
         null_check = field_type['nullcheck'](action)
-        for attr, attr_dict in field_type['attr_kwargs'].iteritems():
+        for attr, attr_dict in six.iteritems(field_type['attr_kwargs']):
             if attr_dict is None:
                 continue
             if attr == 'value' and null_check:
@@ -151,7 +163,7 @@ class ArgParseNode(object):
         except KeyError:
             pass
         return u'{0} = {1}.{2}({3})'.format(self.node_attrs['name'], field_module, self.node_attrs['model'],
-                                           ', '.join(['{0}={1}'.format(i,v) for i,v in django_kwargs.iteritems()]),)
+                                           ', '.join(['{0}={1}'.format(i,v) for i,v in six.iteritems(django_kwargs)]),)
 
 
 class ArgParseNodeBuilder(object):
@@ -165,7 +177,8 @@ class ArgParseNodeBuilder(object):
             sys.stderr.write(self.error)
             self.valid = False
             return
-        parsers = [v for i, v in chain(module.main.__globals__.iteritems(), vars(module).iteritems())
+        main_module = module.main.__globals__ if hasattr(module, 'main') else globals()
+        parsers = [v for i, v in chain(six.iteritems(main_module), six.iteritems(vars(module)))
                    if issubclass(type(v), argparse.ArgumentParser)]
         if not parsers:
             f = tempfile.NamedTemporaryFile()
@@ -174,7 +187,8 @@ class ArgParseNodeBuilder(object):
             f.write('\n'.join(python_code))
             f.seek(0)
             module = imp.load_source(script_name, f.name)
-            parsers = [v for i, v in chain(module.main.__globals__.iteritems(), vars(module).iteritems())
+            main_module = module.main.__globals__ if hasattr(module, 'main') else globals()
+            parsers = [v for i, v in chain(six.iteritems(main_module), six.iteritems(vars(module)))
                    if issubclass(type(v), argparse.ArgumentParser)]
         if not parsers:
             sys.stderr.write('Unable to identify ArgParser for {0}:\n'.format(script_path))
@@ -209,7 +223,7 @@ class ArgParseNodeBuilder(object):
         return {'name': self.class_name, 'path': self.script_path,
                 'description': self.script_description,
                 'inputs': [{'group': container_name, 'nodes': [self.nodes[node].node_attrs for node in nodes]}
-                           for container_name, nodes in self.containers.iteritems()]}
+                           for container_name, nodes in six.iteritems(self.containers)]}
 
     @property
     def json(self):
