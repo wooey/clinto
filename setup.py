@@ -9,7 +9,7 @@ setup(
     version='0.0.0',
     packages=find_packages(),
     scripts=[],
-    install_requires = [],
+    install_requires = ['six',],
     include_package_data=True,
     description='Clinto',
     url='http://www.github.com/chris7/clinto',
