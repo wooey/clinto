@@ -7,6 +7,7 @@ import traceback
 import tempfile
 import six
 import copy
+from collections import OrderedDict
 from .ast import source_parser
 from itertools import chain
 
@@ -48,7 +49,7 @@ GLOBAL_ATTR_KWARGS = {
     'value': {'action_name': 'default'},
     'required': {'action_name': 'required'},
     'help': {'action_name': 'help'},
-    'param': {'callback': lambda x: x.option_strings[0]},
+    'param': {'callback': lambda x: x.option_strings[0] if x.option_strings else ''},
     'choices': {'callback': lambda x: x.choices},
     'choice_limit': {'callback': lambda x: CHOICE_LIMIT_MAP.get(x.nargs, x.nargs)}
     }
@@ -169,6 +170,7 @@ class ArgParseNode(object):
 class ArgParseNodeBuilder(object):
     def __init__(self, script_path=None, script_name=None):
         self.valid = True
+        self.error = ''
         try:
             module = imp.load_source(script_name, script_path)
         except:
@@ -184,7 +186,7 @@ class ArgParseNodeBuilder(object):
             f = tempfile.NamedTemporaryFile()
             ast_source = source_parser.parse_source_file(script_path)
             python_code = source_parser.convert_to_python(list(ast_source))
-            f.write('\n'.join(python_code))
+            f.write(six.b('\n'.join(python_code)))
             f.seek(0)
             module = imp.load_source(script_name, f.name)
             main_module = module.main.__globals__ if hasattr(module, 'main') else globals()
@@ -199,11 +201,11 @@ class ArgParseNodeBuilder(object):
         self.script_path = script_path
         self.script_description = getattr(parser, 'description', None)
         self.script_groups = []
-        self.nodes = {}
+        self.nodes = OrderedDict()
         self.script_groups = []
         non_req = set([i.dest for i in parser._get_optional_actions()])
         self.optional_nodes = set([])
-        self.containers = {}
+        self.containers = OrderedDict()
         for action in parser._actions:
             # This is the help message of argparse
             if action.default == argparse.SUPPRESS:
