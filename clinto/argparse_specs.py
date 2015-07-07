@@ -184,14 +184,20 @@ class ArgParseNodeBuilder(object):
                        if issubclass(type(v), argparse.ArgumentParser)]
         if not parsers:
             f = tempfile.NamedTemporaryFile()
-            ast_source = source_parser.parse_source_file(script_path)
-            python_code = source_parser.convert_to_python(list(ast_source))
-            f.write(six.b('\n'.join(python_code)))
-            f.seek(0)
-            module = imp.load_source(script_name, f.name)
-            main_module = module.main.__globals__ if hasattr(module, 'main') else globals()
-            parsers = [v for i, v in chain(six.iteritems(main_module), six.iteritems(vars(module)))
-                   if issubclass(type(v), argparse.ArgumentParser)]
+            try:
+                ast_source = source_parser.parse_source_file(script_path)
+                python_code = source_parser.convert_to_python(list(ast_source))
+                f.write(six.b('\n'.join(python_code)))
+                f.seek(0)
+                module = imp.load_source(script_name, f.name)
+            except:
+                sys.stderr.write('Error while converting {0} to ast:\n'.format(script_path))
+                self.error = '{0}\n'.format(traceback.format_exc())
+                sys.stderr.write(self.error)
+            else:
+                main_module = module.main.__globals__ if hasattr(module, 'main') else globals()
+                parsers = [v for i, v in chain(six.iteritems(main_module), six.iteritems(vars(module)))
+                       if issubclass(type(v), argparse.ArgumentParser)]
         if not parsers:
             sys.stderr.write('Unable to identify ArgParser for {0}:\n'.format(script_path))
             return
