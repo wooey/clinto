@@ -7,10 +7,12 @@ import traceback
 import tempfile
 import six
 import copy
+import types
 from collections import OrderedDict
 from .ast import source_parser
 from itertools import chain
 
+#TODO: Move this stuff to a utils file
 def is_upload(action):
     """Checks if this should be a user upload
 
@@ -19,6 +21,12 @@ def is_upload(action):
     """
     return 'r' in action.type._mode and (action.default is None or
                                          getattr(action.default, 'name') not in (sys.stderr.name, sys.stdout.name))
+
+def expand_iterable(choices):
+    """
+    Expands an iterable into a list. We use this to expand generators/etc.
+    """
+    return [i for i in choices] if hasattr(choices, '__iter__') else None
 
 # input attributes we try to set:
 # checked, name, type, value
@@ -44,16 +52,16 @@ CHOICE_LIMIT_MAP = {'?': '1', '+': '>=1', '*': '>=0'}
 
 GLOBAL_ATTRS = ['model', 'type']
 
+
 GLOBAL_ATTR_KWARGS = {
     'name': {'action_name': 'dest'},
     'value': {'action_name': 'default'},
     'required': {'action_name': 'required'},
     'help': {'action_name': 'help'},
     'param': {'callback': lambda x: x.option_strings[0] if x.option_strings else ''},
-    'choices': {'callback': lambda x: x.choices},
+    'choices': {'callback': lambda x: expand_iterable(x.choices)},
     'choice_limit': {'callback': lambda x: CHOICE_LIMIT_MAP.get(x.nargs, x.nargs)}
     }
-
 TYPE_FIELDS = {
     # Python Builtins
     bool: {'model': 'BooleanField', 'type': 'checkbox', 'nullcheck': lambda x: x.default is None,
@@ -75,6 +83,7 @@ TYPE_FIELDS = {
                             'upload': {'callback': is_upload}
                         })},
 }
+
 if six.PY2:
     TYPE_FIELDS.update({
         file: {'model': 'FileField', 'type': 'file', 'nullcheck': lambda x: False,
@@ -168,39 +177,40 @@ class ArgParseNode(object):
 
 
 class ArgParseNodeBuilder(object):
-    def __init__(self, script_path=None, script_name=None):
+    def __init__(self, script_path=None, script_name=None, parsers=None):
         self.valid = False
         self.error = ''
-        parsers = []
-        try:
-            module = imp.load_source(script_name, script_path)
-        except:
-            sys.stderr.write('Error while loading {0}:\n'.format(script_path))
-            self.error = '{0}\n'.format(traceback.format_exc())
-            sys.stderr.write(self.error)
-        else:
-            main_module = module.main.__globals__ if hasattr(module, 'main') else globals()
-            parsers = [v for i, v in chain(six.iteritems(main_module), six.iteritems(vars(module)))
-                       if issubclass(type(v), argparse.ArgumentParser)]
-        if not parsers:
-            f = tempfile.NamedTemporaryFile()
+        if parsers is None:
+            parsers = []
             try:
-                ast_source = source_parser.parse_source_file(script_path)
-                python_code = source_parser.convert_to_python(list(ast_source))
-                f.write(six.b('\n'.join(python_code)))
-                f.seek(0)
-                module = imp.load_source(script_name, f.name)
+                module = imp.load_source(script_name, script_path)
             except:
-                sys.stderr.write('Error while converting {0} to ast:\n'.format(script_path))
+                sys.stderr.write('Error while loading {0}:\n'.format(script_path))
                 self.error = '{0}\n'.format(traceback.format_exc())
                 sys.stderr.write(self.error)
             else:
                 main_module = module.main.__globals__ if hasattr(module, 'main') else globals()
                 parsers = [v for i, v in chain(six.iteritems(main_module), six.iteritems(vars(module)))
-                       if issubclass(type(v), argparse.ArgumentParser)]
-        if not parsers:
-            sys.stderr.write('Unable to identify ArgParser for {0}:\n'.format(script_path))
-            return
+                           if issubclass(type(v), argparse.ArgumentParser)]
+            if not parsers:
+                f = tempfile.NamedTemporaryFile()
+                try:
+                    ast_source = source_parser.parse_source_file(script_path)
+                    python_code = source_parser.convert_to_python(list(ast_source))
+                    f.write(six.b('\n'.join(python_code)))
+                    f.seek(0)
+                    module = imp.load_source(script_name, f.name)
+                except:
+                    sys.stderr.write('Error while converting {0} to ast:\n'.format(script_path))
+                    self.error = '{0}\n'.format(traceback.format_exc())
+                    sys.stderr.write(self.error)
+                else:
+                    main_module = module.main.__globals__ if hasattr(module, 'main') else globals()
+                    parsers = [v for i, v in chain(six.iteritems(main_module), six.iteritems(vars(module)))
+                           if issubclass(type(v), argparse.ArgumentParser)]
+            if not parsers:
+                sys.stderr.write('Unable to identify ArgParser for {0}:\n'.format(script_path))
+                return
         self.valid = True
         parser = parsers[0]
         self.class_name = script_name

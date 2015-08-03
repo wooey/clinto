@@ -1,6 +1,6 @@
 import unittest, sys
 from . import factories
-from ..argparse_specs import ArgParseNode
+from ..argparse_specs import ArgParseNode, ArgParseNodeBuilder, expand_iterable
 
 class Test_ArgParse(unittest.TestCase):
     def setUp(self):
@@ -29,6 +29,13 @@ class Test_ArgParse(unittest.TestCase):
         attrs = choicefield.node_attrs
         self.base_test(attrs, self.parser.CHOICEFIELD)
         assert attrs['model'] == 'CharField'
+        # test range
+        rangefield = ArgParseNode(action=self.parser.rangefield)
+        assert rangefield.node_attrs['choices'] == expand_iterable(self.parser.rangefield.choices)
+
+    def test_argparse_script(self):
+        nodes = ArgParseNodeBuilder(parsers=[self.parser.parser])
+
 
 suite = unittest.TestLoader().loadTestsFromTestCase(Test_ArgParse)
 unittest.TextTestRunner(verbosity=2).run(suite)
