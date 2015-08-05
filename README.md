@@ -1,4 +1,6 @@
 # clinto
+
+[![Join the chat at https://gitter.im/wooey/clinto](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/wooey/clinto?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 This converts an assortment of python command line interfaces into a language agnostic build spec for usage in GUI creation.
 
 Here's a basic usage:
