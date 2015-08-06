@@ -1,4 +1,5 @@
 import argparse
+from six.moves import range
 
 param_int = 0
 
@@ -21,7 +22,7 @@ class ArgParseFactory(object):
     FILEFIELD = BaseDict(param='--ff-out', type=argparse.FileType('w'), help='Test help')
     UPLOADFILEFIELD = BaseDict(type=argparse.FileType('r'))
     CHOICEFIELD = BaseDict(choices=['a', 'b', 'c'])
-    RANGECHOICES = BaseDict(choices=xrange(-10,20,2))
+    RANGECHOICES = BaseDict(choices=range(-10,20,2))
 
     def __init__(self):
         super(ArgParseFactory, self).__init__()
