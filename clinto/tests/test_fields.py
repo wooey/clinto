@@ -1,6 +1,6 @@
 import unittest, sys
 from . import factories
-from ..argparse_specs import ArgParseNode, ArgParseNodeBuilder, expand_iterable
+from ..parser import ArgParseNode, Parser, expand_iterable
 
 class Test_ArgParse(unittest.TestCase):
     def setUp(self):
@@ -34,7 +34,7 @@ class Test_ArgParse(unittest.TestCase):
         assert rangefield.node_attrs['choices'] == expand_iterable(self.parser.rangefield.choices)
 
     def test_argparse_script(self):
-        nodes = ArgParseNodeBuilder(parsers=[self.parser.parser])
+        nodes = Parser(parsers=[self.parser.parser])
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(Test_ArgParse)

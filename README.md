@@ -5,8 +5,8 @@ This converts an assortment of python command line interfaces into a language ag
 
 Here's a basic usage:
 ```
-from clinto import argparse_specs
-specs = argparse_specs.ArgParseNodeBuilder(script_path='/home/chris/Devel/pythomics/pythomics/scripts/proteinInference.py', script_name='Protein Inference')
+from clinto import parser
+specs = parser.Parser(script_path='/home/chris/Devel/pythomics/pythomics/scripts/proteinInference.py', script_name='Protein Inference')
 specs.get_script_description()
 {'description': '\nThis script will annotate a tab delimited text file with peptides with\ncorresponding proteins present in an annotation file, and can also\nuse this annotation to include iBAQ measures.\n',
  'inputs': [{'group': 'optional arguments',

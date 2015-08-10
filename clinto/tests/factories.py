@@ -1,4 +1,9 @@
 import argparse
+import six
+try:
+    import xrange
+except ImportError:
+    xrange = six.moves.range
 
 param_int = 0
 
