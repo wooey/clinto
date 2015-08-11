@@ -1,7 +1,9 @@
 # clinto
 [![Build Status](https://travis-ci.org/wooey/clinto.svg)](https://travis-ci.org/wooey/clinto)
+[![Coverage Status](https://coveralls.io/repos/wooey/clinto/badge.svg?branch=master&service=github)](https://coveralls.io/github/wooey/clinto?branch=master)
 
 [![Join the chat at https://gitter.im/wooey/clinto](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/wooey/clinto?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 This converts an assortment of python command line interfaces into a language agnostic build spec for usage in GUI creation.
 
 Here's a basic usage:
