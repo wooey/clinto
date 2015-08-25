@@ -165,10 +165,11 @@ class Parser(object):
     def __init__(self, script_path=None, script_name=None, parsers=None):
         self.valid = False
         self.error = ''
+
         if parsers is None:
             parsers = []
             try:
-                module = imp.load_source(script_name, script_path)
+                module = imp.load_source('__main__', script_path)
             except:
                 sys.stderr.write('Error while loading {0}:\n'.format(script_path))
                 self.error = '{0}\n'.format(traceback.format_exc())
@@ -177,6 +178,7 @@ class Parser(object):
                 main_module = module.main.__globals__ if hasattr(module, 'main') else globals()
                 parsers = [v for i, v in chain(six.iteritems(main_module), six.iteritems(vars(module)))
                            if issubclass(type(v), argparse.ArgumentParser)]
+                           
             if not parsers:
                 f = tempfile.NamedTemporaryFile()
                 try:
@@ -193,9 +195,35 @@ class Parser(object):
                     main_module = module.main.__globals__ if hasattr(module, 'main') else globals()
                     parsers = [v for i, v in chain(six.iteritems(main_module), six.iteritems(vars(module)))
                            if issubclass(type(v), argparse.ArgumentParser)]
+
+            if not parsers:
+                f = tempfile.NamedTemporaryFile()
+                try:
+                    python_code = []
+                    with open(script_path, 'rU') as fi:
+                        for line in fi:
+                            if '.parse_args(' in line:
+                                break
+                            # Crop before parse_args line (prevent script exec/output)
+                            python_code.append(line)
+                    # Write the cropped source file to temporary file
+                    f.write(six.b('\n'.join(python_code)))
+                    f.seek(0)
+                    # Set script name to __main__ to emulate execution (catch nested argparse)
+                    module = imp.load_source('__main__', f.name)
+                except:
+                    sys.stderr.write('Error attempting cropped execution of {0}:\n'.format(script_path))
+                    self.error = '{0}\n'.format(traceback.format_exc())
+                    sys.stderr.write(self.error)
+                else:
+                    main_module = module.main.__globals__ if hasattr(module, 'main') else globals()
+                    parsers = [v for i, v in chain(six.iteritems(main_module), six.iteritems(vars(module)))
+                           if issubclass(type(v), argparse.ArgumentParser)]
+                           
             if not parsers:
                 sys.stderr.write('Unable to identify ArgParser for {0}:\n'.format(script_path))
                 return
+
         self.valid = True
         parser = parsers[0]
         self.class_name = script_name
