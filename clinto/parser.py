@@ -13,6 +13,8 @@ from itertools import chain
 from .ast import source_parser
 from .utils import is_upload, expand_iterable
 
+from multiprocessing import Process
+
 # input attributes we try to set:
 # checked, name, type, value
 # extra information we want to append:
@@ -111,6 +113,16 @@ ACTION_CLASS_TO_TYPE_FIELD = {
     })
 }
 
+class ClintoArgumentParserException(Exception):
+
+    def __init__(self, parser, *args, **kwargs):
+        self.parser = parser
+
+
+def parse_args_monkeypatch(self, *args, **kwargs):
+    raise ClintoArgumentParserException(self)
+
+
 class ArgParseNode(object):
     """
         This class takes an argument parser entry and assigns it to a Build spec
@@ -167,16 +179,35 @@ class Parser(object):
         self.error = ''
         if parsers is None:
             parsers = []
+
+            # Try exception-catching first; this should always work
+            # Store prior to monkeypatch to restore
+            parse_args_unmonkey = argparse.ArgumentParser.parse_args
+            argparse.ArgumentParser.parse_args = parse_args_monkeypatch
+
             try:
-                module = imp.load_source(script_name, script_path)
+                execfile(script_path, {'argparse': argparse, '__name__': '__main__'})
+            except ClintoArgumentParserException as e:
+                # Catch the generated exception, passing the ArgumentParser object
+                parsers.append(e.parser)
             except:
-                sys.stderr.write('Error while loading {0}:\n'.format(script_path))
+                sys.stderr.write('Error while trying exception-catch method on {0}:\n'.format(script_path))
                 self.error = '{0}\n'.format(traceback.format_exc())
                 sys.stderr.write(self.error)
-            else:
-                main_module = module.main.__globals__ if hasattr(module, 'main') else globals()
-                parsers = [v for i, v in chain(six.iteritems(main_module), six.iteritems(vars(module)))
-                           if issubclass(type(v), argparse.ArgumentParser)]
+
+            argparse.ArgumentParser.parse_args = parse_args_unmonkey
+
+            if not parsers:
+                try:
+                    module = imp.load_source(script_name, script_path)
+                except:
+                    sys.stderr.write('Error while loading {0}:\n'.format(script_path))
+                    self.error = '{0}\n'.format(traceback.format_exc())
+                    sys.stderr.write(self.error)
+                else:
+                    main_module = module.main.__globals__ if hasattr(module, 'main') else globals()
+                    parsers = [v for i, v in chain(six.iteritems(main_module), six.iteritems(vars(module)))
+                               if issubclass(type(v), argparse.ArgumentParser)]
             if not parsers:
                 f = tempfile.NamedTemporaryFile()
                 try:
@@ -196,6 +227,7 @@ class Parser(object):
             if not parsers:
                 sys.stderr.write('Unable to identify ArgParser for {0}:\n'.format(script_path))
                 return
+
         self.valid = True
         parser = parsers[0]
         self.class_name = script_name
