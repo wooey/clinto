@@ -1,8 +1,7 @@
 import unittest
 
 from . import factories
-from clinto.parser import Parser
-from clinto.parsers.argparse import ArgParseNode, expand_iterable, ArgParseParser
+from clinto.parsers.argparse_ import ArgParseNode, expand_iterable, ArgParseParser
 
 
 class Test_ArgParse(unittest.TestCase):
