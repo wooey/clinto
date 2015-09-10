@@ -15,11 +15,13 @@ class Parser(object):
         with open(script_path, 'r') as f:
             script_source = f.read()
 
-        for pc in parsers:
-            parser = pc(script_path, script_source)
-            if parser.is_valid:
+        parser_obj = [pc(script_path, script_source) for pc in parsers]
+        parser_obj = sorted(parser_obj, key=lambda x: x.score, reverse=True)
+
+        for po in parser_obj:
+            if po.is_valid:
                 # It worked
-                self.parser = parser
+                self.parser = po
 
     def get_script_description(self):
         if self.parser:

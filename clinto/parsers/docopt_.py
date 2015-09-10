@@ -71,8 +71,12 @@ class DocOptNode(object):
 
 class DocOptParser(BaseParser):
 
-    extensions = ['.py']
-    contains = "docopt"
+    def heuristic(self):
+        return [
+            self.script_ext in ['.py', '.py3', '.py2'],
+            'docopt' in self.script_source,
+            '__doc__' in self.script_source,
+        ]
 
     def extract_parser(self):
         if docopt is None:

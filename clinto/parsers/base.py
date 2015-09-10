@@ -21,19 +21,17 @@ def parse_args_monkeypatch(self, *args, **kwargs):
 
 class BaseParser(object):
 
-    extensions = []
-    contains = ""
-
     def __init__(self, script_path=None, script_source=None):
         self.is_valid = False
         self.error = ''
         self.parser = None
 
         self.script_path = script_path
+        # We need this for heuristic, may as well happen once
+        self.script_ext = os.path.splitext(os.path.basename(self.script_path))[1]
         self.script_source = script_source
 
-        if not self.check_valid():
-            return
+        self._heuristic_score = None
 
         self.extract_parser()
 
@@ -42,12 +40,22 @@ class BaseParser(object):
 
         self.process_parser()
 
-    def check_valid(self):
-        if self.script_path:
-            ext = os.path.splitext(os.path.basename(self.script_path))[1]
-            return ext in self.extensions and self.contains in self.script_source
+    @property
+    def score(self):
+        """
+        Calculate and return a heuristic score for this Parser against the provided
+        script source and path. This is used to order the ArgumentParsers as "most likely to work"
+        against a given script/source file.
 
-        return False
+        Each parser has a calculate_score() function that returns a list of booleans representing
+        the matches against conditions. This is converted into a % match and used to sort parse engines.
+
+        :return: float
+        """
+        if self._heuristic_score is None:
+            matches = self.heuristic()
+            self._heuristic_score = float(sum(matches)) / float(len(matches))
+        return self._heuristic_score
 
     def extract_parser(self):
         pass

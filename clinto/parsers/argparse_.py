@@ -165,8 +165,14 @@ class ArgParseNode(object):
 
 class ArgParseParser(BaseParser):
 
-    extensions = ['.py']
-    contains = "ArgumentParser"
+    def heuristic(self):
+        return [
+            self.script_ext in ['.py', '.py3', '.py2'],
+            'argparse' in self.script_source,
+            'ArgumentParser' in self.script_source,
+            '.parse_args' in self.script_source,
+            '.add_argument' in self.script_source,
+        ]
 
     def extract_parser(self):
         parsers = []
