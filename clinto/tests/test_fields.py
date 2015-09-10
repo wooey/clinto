@@ -37,7 +37,7 @@ class Test_ArgParse(unittest.TestCase):
 
     def test_argparse_script(self):
         parser = ArgParseParser()
-        parser.script_path = "Test"
+        parser.script_path = "test.py"
         parser.parser = self.parser.parser
         parser.process_parser()
         description = parser.get_script_description()

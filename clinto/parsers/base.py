@@ -28,7 +28,9 @@ class BaseParser(object):
 
         self.script_path = script_path
         # We need this for heuristic, may as well happen once
-        self.script_ext = os.path.splitext(os.path.basename(self.script_path))[1]
+        if self.script_path:
+            self.script_ext = os.path.splitext(os.path.basename(self.script_path))[1]
+
         self.script_source = script_source
 
         self._heuristic_score = None
