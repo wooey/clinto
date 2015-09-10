@@ -43,8 +43,11 @@ class BaseParser(object):
         self.process_parser()
 
     def check_valid(self):
-        ext = os.path.splitext(os.path.basename(self.script_path))[1]
-        return ext in self.extensions and self.contains in self.script_source
+        if self.script_path:
+            ext = os.path.splitext(os.path.basename(self.script_path))[1]
+            return ext in self.extensions and self.contains in self.script_source
+
+        return False
 
     def extract_parser(self):
         pass

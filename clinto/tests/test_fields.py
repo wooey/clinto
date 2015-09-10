@@ -1,7 +1,8 @@
 import unittest
 
 from . import factories
-from clinto.parsers.parser import ArgParseNode, Parser, expand_iterable
+from clinto.parser import Parser
+from clinto.parsers.argparse import ArgParseNode, expand_iterable, ArgParseParser
 
 
 class Test_ArgParse(unittest.TestCase):
@@ -36,7 +37,12 @@ class Test_ArgParse(unittest.TestCase):
         assert rangefield.node_attrs['choices'] == expand_iterable(self.parser.rangefield.choices)
 
     def test_argparse_script(self):
-        nodes = Parser(parsers=[self.parser.parser])
+        parser = ArgParseParser()
+        parser.script_path = "Test"
+        parser.parser = self.parser.parser
+        parser.process_parser()
+        description = parser.get_script_description()
+        nodes = description['inputs'][0]['nodes']
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(Test_ArgParse)
