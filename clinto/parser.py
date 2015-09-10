@@ -1,14 +1,14 @@
-from .parsers import ArgParseParser
+from .parsers import ArgParseParser, DocOptParser
 
 parsers = [
     ArgParseParser,
-
+    DocOptParser,
 ]
 
 
 class Parser(object):
 
-    def __init__(self, script_path=None):
+    def __init__(self, script_path=None, script_name=None):
         self.parser = None
 
         # Load file
@@ -29,3 +29,10 @@ class Parser(object):
     def json(self):
         if self.parser:
             return self.parser.json
+
+    @property
+    def valid(self):
+        if self.parser:
+            return self.parser.is_valid
+
+        return False
