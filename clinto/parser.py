@@ -38,3 +38,10 @@ class Parser(object):
             return self.parser.is_valid
 
         return False
+
+    @property
+    def error(self):
+        if self.parser:
+            return self.parser.error
+
+        return False
