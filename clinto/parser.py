@@ -31,17 +31,16 @@ class Parser(object):
     def json(self):
         if self.parser:
             return self.parser.json
+        return {}
 
     @property
     def valid(self):
         if self.parser:
             return self.parser.is_valid
-
         return False
 
     @property
     def error(self):
         if self.parser:
             return self.parser.error
-
-        return False
+        return ''

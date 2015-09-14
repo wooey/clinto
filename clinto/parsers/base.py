@@ -66,7 +66,7 @@ class BaseParser(object):
         pass
 
     def get_script_description(self):
-        pass
+        return {}
 
     @property
     def json(self):
