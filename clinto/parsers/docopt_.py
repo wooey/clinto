@@ -97,11 +97,11 @@ class DocOptParser(BaseParser):
         except AttributeError:
             return
 
+        if doc is None:
+            return
+
         # We have the documentation string in 'doc'
         self.is_valid = True
-
-        # Parse and monkey patch exception catch
-
         self.parser = doc
 
     def process_parser(self):
@@ -150,11 +150,9 @@ class DocOptParser(BaseParser):
             self.nodes[option_name] = node
             self.containers['default'].append(option_name)
 
-
         self.class_name = os.path.splitext(os.path.basename(self.script_path))[0]
         self.script_path = self.script_path
         self.script_description = self.parser
-
 
     def get_script_description(self):
         return {'name': self.class_name, 'path': self.script_path,
