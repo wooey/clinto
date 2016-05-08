@@ -38,6 +38,17 @@ CHOICE_LIMIT_MAP = {'?': '1', '+': '>=1', '*': '>=0'}
 
 GLOBAL_ATTRS = ['model', 'type']
 
+def get_parameter_action(action):
+    """
+    To foster a general schema that can accomodate multiple parsers, the general behavior here is described
+    rather than the specific language of a given parser. For instance, the 'append' action of an argument
+    is collapsing each argument given to a single argument. It also returns a set of actions as well, since
+    presumably some actions can impact multiple parameter options
+    """
+    actions = set()
+    if isinstance(action, argparse._AppendAction):
+        actions.add('collapse_arguments')
+    return actions
 
 GLOBAL_ATTR_KWARGS = {
     'name': {'action_name': 'dest'},
@@ -45,6 +56,7 @@ GLOBAL_ATTR_KWARGS = {
     'required': {'action_name': 'required'},
     'help': {'action_name': 'help'},
     'param': {'callback': lambda x: x.option_strings[0] if x.option_strings else ''},
+    'param_action': {'callback': lambda x: get_parameter_action(x)},
     'choices': {'callback': lambda x: expand_iterable(x.choices)},
     'choice_limit': {'callback': lambda x: CHOICE_LIMIT_MAP.get(x.nargs, x.nargs)}
     }
@@ -133,7 +145,7 @@ class ArgParseNode(object):
             if attr == 'value' and null_check:
                 continue
             if 'action_name' in attr_dict:
-                self.node_attrs[attr] = getattr(action, attr_dict['action_name'])
+                self.node_attrs[attr] = getattr(action, attr_dict['action_name'], None)
             elif 'callback' in attr_dict:
                 self.node_attrs[attr] = attr_dict['callback'](action)
 
