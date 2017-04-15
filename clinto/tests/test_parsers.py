@@ -63,6 +63,11 @@ class Test_ArgParse(unittest.TestCase):
             }
         )
 
+    def test_error_script(self):
+        script_path = os.path.join(self.script_dir, 'error_script.py')
+        parser = Parser(script_path=script_path)
+        self.assertIn('ImportError: No module named something_i_dont_have', parser.error)
+
 
 suite = unittest.TestLoader().loadTestsFromTestCase(Test_ArgParse)
 unittest.TextTestRunner(verbosity=2).run(suite)
