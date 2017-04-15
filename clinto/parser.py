@@ -10,6 +10,7 @@ class Parser(object):
 
     def __init__(self, script_path=None, script_name=None):
         self.parser = None
+        self._error = ''
 
         # Load file
         with open(script_path, 'r') as f:
@@ -22,6 +23,12 @@ class Parser(object):
             if po.is_valid:
                 # It worked
                 self.parser = po
+                break
+        else:
+            # No parser found, fetch the error from the highest scoring parser for reporting
+            self._error = parser_obj[0].error
+
+
 
     def get_script_description(self):
         if self.parser:
@@ -43,4 +50,4 @@ class Parser(object):
     def error(self):
         if self.parser:
             return self.parser.error
-        return ''
+        return self._error
