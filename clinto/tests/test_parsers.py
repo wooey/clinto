@@ -1,7 +1,9 @@
+import os
 import unittest
 
 from . import factories
 from clinto.parsers.argparse_ import ArgParseNode, expand_iterable, ArgParseParser
+from clinto.parser import Parser
 
 
 class Test_ArgParse(unittest.TestCase):
@@ -11,6 +13,9 @@ class Test_ArgParse(unittest.TestCase):
             for i in self.parser.COMMON:
                 assert fields[i] == defs[i], "{}: {} is not {}\n".format(i, fields[i], defs[i])
         self.base_test = test_func
+        self.base_dir = os.path.split(__file__)[0]
+        self.parser_script_dir = 'argparse_scripts'
+        self.script_dir = os.path.join(self.base_dir, self.parser_script_dir)
 
     def test_file_field(self):
         filefield = ArgParseNode(action=self.parser.filefield)
@@ -36,12 +41,27 @@ class Test_ArgParse(unittest.TestCase):
         assert rangefield.node_attrs['choices'] == expand_iterable(self.parser.rangefield.choices)
 
     def test_argparse_script(self):
-        parser = ArgParseParser()
-        parser.script_path = "test.py"
-        parser.parser = self.parser.parser
-        parser.process_parser()
-        description = parser.get_script_description()
-        nodes = description['inputs'][0]['nodes']
+        script_path = os.path.join(self.script_dir, 'choices.py')
+        parser = Parser(script_path=script_path)
+
+        script_params = parser.get_script_description()
+        self.assertEqual(script_params['path'], script_path)
+
+        # Make sure we return parameters in the order the script defined them and in groups
+        # We do not test this that exhaustively atm since the structure is likely to change when subparsers
+        # are added
+        self.assertDictEqual(
+            script_params['inputs'][0],
+            {
+                'nodes': [
+                    {'param_action': set([]), 'name': 'first_pos', 'required': True, 'param': '', 'choices': None,
+                    'choice_limit': None, 'model': 'CharField', 'type': 'text', 'help': None},
+                    {'param_action': set([]), 'name': 'second-pos', 'required': True, 'param': '', 'choices': None,
+                    'choice_limit': None, 'model': 'CharField', 'type': 'text', 'help': None}
+                ],
+                'group': 'positional arguments'
+            }
+        )
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(Test_ArgParse)
