@@ -2,6 +2,7 @@ import os
 import unittest
 
 from . import factories
+from clinto.version import PY_MINOR_VERSION, PY36
 from clinto.parsers.argparse_ import ArgParseNode, expand_iterable, ArgParseParser
 from clinto.parser import Parser
 
@@ -66,7 +67,11 @@ class Test_ArgParse(unittest.TestCase):
     def test_error_script(self):
         script_path = os.path.join(self.script_dir, 'error_script.py')
         parser = Parser(script_path=script_path)
-        self.assertIn('ImportError', parser.error)
+
+        if PY_MINOR_VERSION >= PY36:
+            self.assertIn('ModuleNotFoundError', parser.error)
+        else:
+            self.assertIn('ImportError', parser.error)
         self.assertIn('something_i_dont_have', parser.error)
 
         script_path = os.path.join(self.script_dir, 'choices.py')
