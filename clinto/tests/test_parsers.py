@@ -19,6 +19,19 @@ class Test_ArgParse(unittest.TestCase):
         self.parser_script_dir = 'argparse_scripts'
         self.script_dir = os.path.join(self.base_dir, self.parser_script_dir)
 
+    def test_subparser(self):
+        script_path = os.path.join(self.script_dir, 'subparser_script.py')
+        parser = Parser(script_path=script_path)
+        description = parser.get_script_description()
+        main_parser = description['inputs']['']
+        main_parser_group1 = main_parser[0]
+        self.assertEqual(main_parser_group1['nodes'][0]['name'], 'test_arg')
+        self.assertEqual(main_parser_group1['group'], 'optional arguments')
+
+        subparser1 = description['inputs']['subparser1']
+        subparser_group1 = subparser1[0]
+        self.assertEqual(subparser_group1['nodes'][0]['name'], 'sp1')
+
     def test_script_version(self):
         script_path = os.path.join(self.script_dir, 'choices.py')
         parser = Parser(script_path=script_path)
@@ -59,7 +72,7 @@ class Test_ArgParse(unittest.TestCase):
         # We do not test this that exhaustively atm since the structure is likely to change when subparsers
         # are added
         self.assertDictEqual(
-            script_params['inputs'][0],
+            script_params['inputs'][''][0],
             {
                 'nodes': [
                     {'param_action': set([]), 'name': 'first_pos', 'required': True, 'param': '', 'choices': None,

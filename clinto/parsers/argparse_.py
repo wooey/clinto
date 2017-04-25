@@ -255,8 +255,10 @@ class ArgParseParser(BaseParser):
 
 
         if self.parser._subparsers is not None:
-            for parser_name, parser in six.iteritems(self.parser._subparsers._actions[1].choices):
-                parsers.append((parser_name, parser))
+            for action in self.parser._subparsers._actions:
+                if isinstance(action, argparse._SubParsersAction):
+                    for parser_name, parser in six.iteritems(action.choices):
+                        parsers.append((parser_name, parser))
 
         self.parsers = OrderedDict()
 
