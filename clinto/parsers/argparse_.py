@@ -126,7 +126,7 @@ ACTION_CLASS_TO_TYPE_FIELD = {
 
 class ArgParseNode(object):
     """
-        This class takes an argument parser entry and assigns it to a Build spec
+     This class takes an argument parser entry and assigns it to a Build spec
     """
     def __init__(self, action=None):
         fields = ACTION_CLASS_TO_TYPE_FIELD.get(type(action), TYPE_FIELDS)
@@ -249,6 +249,7 @@ class ArgParseParser(BaseParser):
         self.class_name = os.path.splitext(os.path.basename(self.script_path))[0]
         self.script_path = self.script_path
         self.script_description = getattr(self.parser, 'description', None)
+        self.script_version = getattr(self.parser, 'version', None)
         self.script_groups = []
         self.nodes = OrderedDict()
         self.script_groups = []
@@ -258,6 +259,9 @@ class ArgParseParser(BaseParser):
         for action in self.parser._actions:
             # This is the help message of argparse
             if action.default == argparse.SUPPRESS:
+                continue
+            if six.PY3 and isinstance(action, argparse._VersionAction):
+                self.script_version = action.version
                 continue
             node = ArgParseNode(action=action)
             container = action.container.title
@@ -271,9 +275,12 @@ class ArgParseParser(BaseParser):
                 self.optional_nodes.add(node.name)
 
     def get_script_description(self):
-        return {'name': self.class_name, 'path': self.script_path,
-                'description': self.script_description,
-                'inputs': [{'group': container_name, 'nodes': [self.nodes[node].node_attrs for node in nodes]}
-                           for container_name, nodes in six.iteritems(self.containers)]}
+        return {
+            'name': self.class_name,
+            'path': self.script_path,
+            'description': self.script_description,
+            'version': self.script_version,
+            'inputs': [{'group': container_name, 'nodes': [self.nodes[node].node_attrs for node in nodes]} for container_name, nodes in six.iteritems(self.containers)],
+        }
 
 

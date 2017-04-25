@@ -1,6 +1,7 @@
 import os
 import unittest
 
+import six
 from . import factories
 from clinto.version import PY_MINOR_VERSION, PY36
 from clinto.parsers.argparse_ import ArgParseNode, expand_iterable, ArgParseParser
@@ -17,6 +18,12 @@ class Test_ArgParse(unittest.TestCase):
         self.base_dir = os.path.split(__file__)[0]
         self.parser_script_dir = 'argparse_scripts'
         self.script_dir = os.path.join(self.base_dir, self.parser_script_dir)
+
+    def test_script_version(self):
+        script_path = os.path.join(self.script_dir, 'choices.py')
+        parser = Parser(script_path=script_path)
+        description = parser.get_script_description()
+        self.assertEqual(description['version'], '2' if six.PY2 else '3')
 
     def test_file_field(self):
         filefield = ArgParseNode(action=self.parser.filefield)
