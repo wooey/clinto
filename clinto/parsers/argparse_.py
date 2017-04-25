@@ -250,37 +250,58 @@ class ArgParseParser(BaseParser):
         self.script_path = self.script_path
         self.script_description = getattr(self.parser, 'description', None)
         self.script_version = getattr(self.parser, 'version', None)
-        self.script_groups = []
-        self.nodes = OrderedDict()
-        self.script_groups = []
-        non_req = set([i.dest for i in self.parser._get_optional_actions()])
-        self.optional_nodes = set([])
-        self.containers = OrderedDict()
-        for action in self.parser._actions:
-            # This is the help message of argparse
-            if action.default == argparse.SUPPRESS:
-                continue
-            if six.PY3 and isinstance(action, argparse._VersionAction):
-                self.script_version = action.version
-                continue
-            node = ArgParseNode(action=action)
-            container = action.container.title
-            container_node = self.containers.get(container, None)
-            if container_node is None:
-                container_node = []
-                self.containers[container] = container_node
-            self.nodes[node.name] = node
-            container_node.append(node.name)
-            if action.dest in non_req:
-                self.optional_nodes.add(node.name)
+
+        parsers = [('', self.parser)]
+
+
+        if self.parser._subparsers is not None:
+            for parser_name, parser in six.iteritems(self.parser._subparsers._actions[1].choices):
+                parsers.append((parser_name, parser))
+
+        self.parsers = OrderedDict()
+
+        for parser_name, parser in parsers:
+            nodes = OrderedDict()
+            containers = OrderedDict()
+
+            for action in parser._actions:
+                # This is the help message of argparse
+                if action.default == argparse.SUPPRESS:
+                    continue
+                if self.script_version is None and six.PY3 and isinstance(action, argparse._VersionAction):
+                    self.script_version = action.version
+                    continue
+                node = ArgParseNode(action=action)
+                container = action.container.title
+                container_node = containers.get(container, None)
+                if container_node is None:
+                    container_node = []
+                    containers[container] = container_node
+                nodes[node.name] = node
+                container_node.append(node.name)
+
+            self.parsers[parser_name] = {
+                'nodes': nodes,
+                'containers': containers
+            }
 
     def get_script_description(self):
-        return {
+        input_dict = OrderedDict()
+        parser_schema = {
             'name': self.class_name,
             'path': self.script_path,
             'description': self.script_description,
             'version': self.script_version,
-            'inputs': [{'group': container_name, 'nodes': [self.nodes[node].node_attrs for node in nodes]} for container_name, nodes in six.iteritems(self.containers)],
+            'inputs': input_dict,
         }
+
+        for parser_name, parser_info in six.iteritems(self.parsers):
+            parser_actions = []
+            input_dict[parser_name] = parser_actions
+            containers, parser_nodes = parser_info['containers'], parser_info['nodes']
+            for container_name, container_nodes in six.iteritems(containers):
+                parser_actions.append({'group': container_name, 'nodes': [parser_nodes[node].node_attrs for node in container_nodes]})
+
+        return parser_schema
 
 
