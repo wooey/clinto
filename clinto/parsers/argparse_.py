@@ -270,6 +270,9 @@ class ArgParseParser(BaseParser):
                 # This is the help message of argparse
                 if action.default == argparse.SUPPRESS:
                     continue
+                # The action is the subparser
+                if isinstance(action, argparse._SubParsersAction):
+                    continue
                 if self.script_version is None and six.PY3 and isinstance(action, argparse._VersionAction):
                     self.script_version = action.version
                     continue
