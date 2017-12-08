@@ -8,7 +8,7 @@ from clinto.parsers.argparse_ import ArgParseNode, expand_iterable, ArgParsePars
 from clinto.parser import Parser
 
 
-class Test_ArgParse(unittest.TestCase):
+class TestArgParse(unittest.TestCase):
     def setUp(self):
         self.parser = factories.ArgParseFactory()
         def test_func(fields, defs):
@@ -99,5 +99,34 @@ class Test_ArgParse(unittest.TestCase):
         self.assertEquals('', parser.error)
 
 
-suite = unittest.TestLoader().loadTestsFromTestCase(Test_ArgParse)
-unittest.TextTestRunner(verbosity=2).run(suite)
+class TestDocOpt(unittest.TestCase):
+    def setUp(self):
+        self.base_dir = os.path.split(__file__)[0]
+        self.parser_script_dir = 'docopt_scripts'
+        self.script_dir = os.path.join(self.base_dir, self.parser_script_dir)
+
+    def test_naval_fate(self):
+        script_path = os.path.join(self.script_dir, 'naval_fate.py')
+        parser = Parser(script_path=script_path)
+        script_params = parser.get_script_description()
+        self.assertEqual(script_params['path'], script_path)
+        self.assertEqual(script_params['name'], 'naval_fate')
+
+        # Make sure we return parameters in the order the script defined them and in groups
+        # We do not test this that exhaustively atm since the structure is likely to change when subparsers
+        # are added
+        self.assertDictEqual(
+            script_params['inputs'][''][0],
+            {
+                'nodes': [
+                    {'model': 'CharField', 'type': 'text', 'name': 'speed', 'param': '--speed'},
+                    {'model': 'BooleanField', 'type': 'checkbox', 'name': 'moored', 'param': '--moored'},
+                    {'model': 'BooleanField', 'type': 'checkbox', 'name': 'drifting', 'param': '--drifting'}
+                ],
+                'group': 'default'
+            }
+        )
+
+
+if __name__ == '__main__':
+    unittest.main()
