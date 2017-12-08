@@ -154,11 +154,23 @@ class DocOptParser(BaseParser):
         self.class_name = os.path.splitext(os.path.basename(self.script_path))[0]
         self.script_path = self.script_path
         self.script_description = self.parser
+        # TODO: Make AST compatible parser for docopt to extract the version provided to docopt function
+        # self.script_version = parser.get('version')
 
     def get_script_description(self):
-        return {'name': self.class_name, 'path': self.script_path,
-                'description': self.script_description,
-                'inputs': [{'group': container_name, 'nodes': [self.nodes[node].node_attrs for node in nodes]}
-                           for container_name, nodes in six.iteritems(self.containers)]}
+        # There are no real subparsers in docopt that we can access via introspection so we use the default
+        # subparser of '' (no subparser/main parser)
+        parser_name = ''
+        parser_inputs = [{
+            'group': container_name,
+            'nodes': [self.nodes[node].node_attrs for node in nodes]
+            } for container_name, nodes in six.iteritems(self.containers)
+        ]
+        return {
+            'name': self.class_name,
+            'path': self.script_path,
+            'description': self.script_description,
+            'inputs': OrderedDict([(parser_name, parser_inputs)])
+        }
 
 

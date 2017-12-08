@@ -1,7 +1,12 @@
 import argparse
 import sys
+import six
 
-parser = argparse.ArgumentParser(description="Something")
+if six.PY2:
+    parser = argparse.ArgumentParser(description="Something", version='2')
+else:
+    parser = argparse.ArgumentParser(description="Something")
+    parser.add_argument('--version', action='version', version='3')
 parser.add_argument('first_pos')
 parser.add_argument('second-pos')
 parser.add_argument('--one-choice', choices=[0, 1, 2, 3], nargs=1)
