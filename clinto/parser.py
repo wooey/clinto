@@ -15,9 +15,9 @@ class Parser(object):
         self._error = ''
 
         if zipfile.is_zipfile(script_path):
-            zip = zipfile.ZipFile(script_path)
-            with zip.open('__main__.py') as f:
-                script_source = f.read()
+            with zipfile.ZipFile(script_path) as zip:
+                with zip.open('__main__.py', 'r') as f:
+                    script_source = f.read().decode('utf-8')
         else:
             with open(script_path, 'r') as f:
                 script_source = f.read()
