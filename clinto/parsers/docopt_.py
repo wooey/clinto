@@ -84,7 +84,8 @@ class DocOptParser(BaseParser):
             return False
 
         try:
-            module = imp.load_source('__name__', self.script_path)
+            module = imp.new_module('__name__')
+            six.exec_(self.script_source, module.__dict__)
 
         except Exception:
             sys.stderr.write('Error while loading {0}:\n'.format(self.script_path))

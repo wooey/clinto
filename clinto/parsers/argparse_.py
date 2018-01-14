@@ -197,10 +197,12 @@ class ArgParseParser(BaseParser):
         try:
             exec(
                 self.script_source,
-                {'argparse': argparse,
+                {
+                    'argparse': argparse,
                     '__name__': '__main__',
                     '__file__': self.script_path,
-                 })
+                 }
+            )
         except ClintoArgumentParserException as e:
             # Catch the generated exception, passing the ArgumentParser object
             parsers.append(e.parser)
