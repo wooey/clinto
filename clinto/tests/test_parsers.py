@@ -98,6 +98,20 @@ class TestArgParse(unittest.TestCase):
         parser = Parser(script_path=script_path)
         self.assertEquals('', parser.error)
 
+    def test_zipapp(self):
+        script_path = os.path.join(self.script_dir, 'data_reader.zip')
+        parser = Parser(script_path=script_path)
+        script_params = parser.get_script_description()
+        self.assertDictEqual(
+            script_params['inputs'][''][0],
+            {
+                'nodes': [
+                    {'param_action': set([]), 'name': 'n', 'required': False, 'param': '-n', 'choices': None, 'value': -1,
+                    'choice_limit': None, 'model': 'IntegerField', 'type': 'text', 'help': 'The number of rows to read.'}],
+                'group': 'optional arguments',
+            }
+        )
+
 
 class TestDocOpt(unittest.TestCase):
     def setUp(self):
