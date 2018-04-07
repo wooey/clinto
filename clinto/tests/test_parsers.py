@@ -84,6 +84,35 @@ class TestArgParse(unittest.TestCase):
             }
         )
 
+    def test_function_type_script(self):
+        script_path = os.path.join(self.script_dir, 'function_argtype.py')
+        parser = Parser(script_path=script_path)
+
+        script_params = parser.get_script_description()
+        self.assertEqual(script_params['path'], script_path)
+
+        self.assertDictEqual(
+            script_params['inputs'][''][0],
+            {
+                'nodes': [
+                    {
+                        'param_action': set([]),
+                        'name': 'start_date',
+                        'required': True,
+                        'param': '',
+                        'choices': None,
+                        'choice_limit': None,
+                        'model': 'CharField',
+                        'type': 'text',
+                        'help': 'Use date in format YYYYMMDD (e.g. 20180131)',
+                        # The default argument
+                        'value': '20180131'
+                    }
+                ],
+                'group': 'positional arguments'
+            }
+        )
+
     def test_error_script(self):
         script_path = os.path.join(self.script_dir, 'error_script.py')
         parser = Parser(script_path=script_path)

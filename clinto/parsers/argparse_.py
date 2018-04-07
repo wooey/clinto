@@ -1,14 +1,17 @@
 from __future__ import absolute_import
 import argparse
-import sys
-import os
 import json
 import imp
-import traceback
+import os
+import sys
 import tempfile
-import six
+import traceback
+import types
 from collections import OrderedDict
 from itertools import chain
+
+import six
+
 from ..ast import source_parser
 from ..utils import is_upload, expand_iterable
 from .base import BaseParser, parse_args_monkeypatch, ClintoArgumentParserException, update_dict_copy
@@ -74,12 +77,27 @@ TYPE_FIELDS = {
     str: {'model': 'CharField', 'type': 'text', 'nullcheck': lambda x: x.default == '' or x.default is None,
           'attr_kwargs': GLOBAL_ATTR_KWARGS},
     # Argparse specific type field types
-    argparse.FileType: {'model': 'FileField', 'type': 'file', 'nullcheck': lambda x: False,
-                        'attr_kwargs': dict(GLOBAL_ATTR_KWARGS, **{
-                            'value': None,
-                            'required': {'callback': lambda x: x.required or x.default in (sys.stdout, sys.stdin)},
-                            'upload': {'callback': is_upload}
-                        })},
+    argparse.FileType: {
+        'model': 'FileField',
+        'type': 'file',
+        'nullcheck': lambda x: False,
+        'attr_kwargs': dict(
+            GLOBAL_ATTR_KWARGS, **{
+                'value': None,
+                'required': {
+                    'callback': lambda x: x.required or x.default in (sys.stdout, sys.stdin)
+                },
+                'upload': {
+                    'callback': is_upload
+                }
+            }),
+    },
+    types.FunctionType: {
+        'model': 'CharField',
+        'type': 'text',
+        'nullcheck': lambda x: x.default if callable(x.default) else x.default is None,
+        'attr_kwargs': GLOBAL_ATTR_KWARGS
+    },
 
 }
 
