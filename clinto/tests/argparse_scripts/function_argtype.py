@@ -18,6 +18,12 @@ parser.add_argument(
     help='Use date in format YYYYMMDD (e.g. 20180131)',
     default='20180131'
 )
+parser.add_argument(
+    'lowercase',
+    type=str.lower,
+    help='Lowercase it',
+    default='ABC',
+)
 
 
 def main():

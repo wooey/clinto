@@ -107,7 +107,20 @@ class TestArgParse(unittest.TestCase):
                         'help': 'Use date in format YYYYMMDD (e.g. 20180131)',
                         # The default argument
                         'value': '20180131'
+                    },
+                    {
+                        'param_action': set([]),
+                        'name': 'lowercase',
+                        'required': True,
+                        'param': '',
+                        'choices': None,
+                        'value': 'ABC',
+                        'choice_limit': None,
+                        'model': 'CharField',
+                        'type': 'text',
+                        'help': 'Lowercase it'
                     }
+
                 ],
                 'group': 'positional arguments'
             }
