@@ -155,6 +155,10 @@ class ArgParseNode(object):
                 field_types = [i for i in fields.keys() if i is not None and isinstance(action.type, i)]
             if len(field_types) == 1:
                 field_type = fields[field_types[0]]
+            if not field_types:
+                # We cannot ascertain the type, but if it is a callable. Assign it to a charfield by default
+                if callable(action.type):
+                    field_type = fields[types.FunctionType]
         self.node_attrs = dict([(i, field_type[i]) for i in GLOBAL_ATTRS])
         null_check = field_type['nullcheck'](action)
         for attr, attr_dict in six.iteritems(field_type['attr_kwargs']):
