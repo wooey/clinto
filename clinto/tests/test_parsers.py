@@ -5,6 +5,7 @@ import six
 from . import factories
 from clinto.version import PY_MINOR_VERSION, PY36
 from clinto.parsers.argparse_ import ArgParseNode, expand_iterable, ArgParseParser
+from clinto.parsers.constants import SPECIFY_EVERY_PARAM
 from clinto.parser import Parser
 
 
@@ -83,6 +84,16 @@ class TestArgParse(unittest.TestCase):
                 'group': 'positional arguments'
             }
         )
+
+    def test_argparse_specify_every_param(self):
+        script_path = os.path.join(self.script_dir, 'choices.py')
+        parser = Parser(script_path=script_path)
+
+        script_params = parser.get_script_description()
+        self.assertEqual(script_params['path'], script_path)
+
+        append_field = [i for i in script_params['inputs'][''][1]['nodes'] if i['param'] == '--need-at-least-one-numbers'][0]
+        self.assertIn(SPECIFY_EVERY_PARAM, append_field['param_action'])
 
     def test_function_type_script(self):
         script_path = os.path.join(self.script_dir, 'function_argtype.py')

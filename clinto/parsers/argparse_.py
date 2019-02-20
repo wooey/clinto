@@ -15,6 +15,7 @@ import six
 from ..ast import source_parser
 from ..utils import is_upload, expand_iterable
 from .base import BaseParser, parse_args_monkeypatch, ClintoArgumentParserException, update_dict_copy
+from .constants import SPECIFY_EVERY_PARAM
 
 
 # input attributes we try to set:
@@ -50,7 +51,7 @@ def get_parameter_action(action):
     """
     actions = set()
     if isinstance(action, argparse._AppendAction):
-        actions.add('collapse_arguments')
+        actions.add(SPECIFY_EVERY_PARAM)
     return actions
 
 GLOBAL_ATTR_KWARGS = {
