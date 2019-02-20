@@ -6,7 +6,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='clinto',
-    version='0.2.1',
+    version='0.3.0',
     packages=find_packages(),
     scripts=[],
     install_requires = ['six',],
