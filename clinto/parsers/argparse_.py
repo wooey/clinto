@@ -147,7 +147,7 @@ class ArgParseNode(object):
     """
      This class takes an argument parser entry and assigns it to a Build spec
     """
-    def __init__(self, action=None):
+    def __init__(self, action=None, mutex_group=None):
         fields = ACTION_CLASS_TO_TYPE_FIELD.get(type(action), TYPE_FIELDS)
         field_type = fields.get(action.type)
         if field_type is None:
@@ -161,6 +161,10 @@ class ArgParseNode(object):
                 if callable(action.type):
                     field_type = fields[types.FunctionType]
         self.node_attrs = dict([(i, field_type[i]) for i in GLOBAL_ATTRS])
+        self.node_attrs['mutex_group'] = {
+            'id': mutex_group[0],
+            'title': mutex_group[1],
+        } if mutex_group else {}
         null_check = field_type['nullcheck'](action)
         for attr, attr_dict in six.iteritems(field_type['attr_kwargs']):
             if attr_dict is None:
@@ -291,6 +295,13 @@ class ArgParseParser(BaseParser):
             nodes = OrderedDict()
             containers = OrderedDict()
 
+            mutex_groups = {}
+            mutex_id_map = {}
+            for mutex_group in parser._mutually_exclusive_groups:
+                for action in mutex_group._group_actions:
+                    group_id = mutex_id_map.setdefault(id(mutex_group), len(mutex_id_map))
+                    mutex_groups[id(action)] = (group_id, mutex_group.title)
+
             for action in parser._actions:
                 # The action is the subparser
                 if isinstance(action, argparse._SubParsersAction):
@@ -300,7 +311,7 @@ class ArgParseParser(BaseParser):
                     continue
                 if action.default == argparse.SUPPRESS:
                     continue
-                node = ArgParseNode(action=action)
+                node = ArgParseNode(action=action, mutex_group=mutex_groups.get(id(action)))
                 container = action.container.title
                 container_node = containers.get(container, None)
                 if container_node is None:

@@ -77,9 +77,9 @@ class TestArgParse(unittest.TestCase):
             {
                 'nodes': [
                     {'param_action': set([]), 'name': 'first_pos', 'required': True, 'param': '', 'choices': None,
-                    'choice_limit': None, 'model': 'CharField', 'type': 'text', 'help': None},
+                    'choice_limit': None, 'model': 'CharField', 'type': 'text', 'help': None, 'mutex_group': {},},
                     {'param_action': set([]), 'name': 'second-pos', 'required': True, 'param': '', 'choices': None,
-                    'choice_limit': None, 'model': 'CharField', 'type': 'text', 'help': None}
+                    'choice_limit': None, 'model': 'CharField', 'type': 'text', 'help': None, 'mutex_group': {},}
                 ],
                 'group': 'positional arguments'
             }
@@ -117,7 +117,8 @@ class TestArgParse(unittest.TestCase):
                         'type': 'text',
                         'help': 'Use date in format YYYYMMDD (e.g. 20180131)',
                         # The default argument
-                        'value': '20180131'
+                        'value': '20180131',
+                        'mutex_group': {},
                     },
                     {
                         'param_action': set([]),
@@ -129,7 +130,8 @@ class TestArgParse(unittest.TestCase):
                         'choice_limit': None,
                         'model': 'CharField',
                         'type': 'text',
-                        'help': 'Lowercase it'
+                        'help': 'Lowercase it',
+                        'mutex_group': {},
                     }
 
                 ],
@@ -160,9 +162,42 @@ class TestArgParse(unittest.TestCase):
             {
                 'nodes': [
                     {'param_action': set([]), 'name': 'n', 'required': False, 'param': '-n', 'choices': None, 'value': -1,
-                    'choice_limit': None, 'model': 'IntegerField', 'type': 'text', 'help': 'The number of rows to read.'}],
+                    'choice_limit': None, 'model': 'IntegerField', 'type': 'text', 'help': 'The number of rows to read.', 'mutex_group': {},}],
                 'group': 'optional arguments',
             }
+        )
+
+    def test_mutually_exclusive_groups(self):
+        script_path = os.path.join(self.script_dir, 'mutually_exclusive.py')
+        parser = Parser(script_path=script_path)
+        script_params = parser.get_script_description()
+        self.assertDictEqual(
+            script_params['inputs'][''][0],
+            {
+                'nodes': [
+                    {
+                        'model': 'BooleanField', 'type': 'checkbox', 'mutex_group': {'id': 0, 'title': None},
+                        'name': 'foo', 'required': False, 'help': None, 'param': '--foo', 'param_action': set(),
+                        'choices': None, 'choice_limit': 0, 'checked': False,
+                    },
+                    {
+                        'model': 'BooleanField', 'type': 'checkbox', 'mutex_group': {'id': 0, 'title': None},
+                        'name': 'bar', 'required': False, 'help': None, 'param': '--bar', 'param_action': set(),
+                        'choices': None, 'choice_limit': 0, 'checked': True,
+                    },
+                    {
+                        'model': 'BooleanField', 'type': 'checkbox', 'mutex_group': {'id': 1, 'title': None},
+                        'name': 'foo2', 'required': False, 'help': None, 'param': '--foo2', 'param_action': set(),
+                        'choices': None, 'choice_limit': 0, 'checked': False,
+                    },
+                    {
+                        'model': 'BooleanField', 'type': 'checkbox', 'mutex_group': {'id': 1, 'title': None},
+                        'name': 'bar2', 'required': False, 'help': None, 'param': '--bar2', 'param_action': set(),
+                        'choices': None, 'choice_limit': 0, 'checked': True,
+                    },
+                ],
+                'group': 'optional arguments',
+            },
         )
 
 
