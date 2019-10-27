@@ -77,9 +77,9 @@ class TestArgParse(unittest.TestCase):
             {
                 'nodes': [
                     {'param_action': set([]), 'name': 'first_pos', 'required': True, 'param': '', 'choices': None,
-                    'choice_limit': None, 'model': 'CharField', 'type': 'text', 'help': None},
+                    'choice_limit': None, 'model': 'CharField', 'type': 'text', 'help': None, 'mutex_group': {},},
                     {'param_action': set([]), 'name': 'second-pos', 'required': True, 'param': '', 'choices': None,
-                    'choice_limit': None, 'model': 'CharField', 'type': 'text', 'help': None}
+                    'choice_limit': None, 'model': 'CharField', 'type': 'text', 'help': None, 'mutex_group': {},}
                 ],
                 'group': 'positional arguments'
             }
@@ -117,7 +117,8 @@ class TestArgParse(unittest.TestCase):
                         'type': 'text',
                         'help': 'Use date in format YYYYMMDD (e.g. 20180131)',
                         # The default argument
-                        'value': '20180131'
+                        'value': '20180131',
+                        'mutex_group': {},
                     },
                     {
                         'param_action': set([]),
@@ -129,7 +130,8 @@ class TestArgParse(unittest.TestCase):
                         'choice_limit': None,
                         'model': 'CharField',
                         'type': 'text',
-                        'help': 'Lowercase it'
+                        'help': 'Lowercase it',
+                        'mutex_group': {},
                     }
 
                 ],
@@ -160,7 +162,7 @@ class TestArgParse(unittest.TestCase):
             {
                 'nodes': [
                     {'param_action': set([]), 'name': 'n', 'required': False, 'param': '-n', 'choices': None, 'value': -1,
-                    'choice_limit': None, 'model': 'IntegerField', 'type': 'text', 'help': 'The number of rows to read.'}],
+                    'choice_limit': None, 'model': 'IntegerField', 'type': 'text', 'help': 'The number of rows to read.', 'mutex_group': {},}],
                 'group': 'optional arguments',
             }
         )
