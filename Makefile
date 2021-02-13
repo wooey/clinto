@@ -3,7 +3,7 @@ testenv:
 	pip install -e .
 
 test:
-	nosetests --with-coverage --cover-erase --cover-branches --cover-package=clinto tests/*
+	nosetests --with-coverage --cover-erase --cover-branches --cover-package=clinto clinto/tests/*
 	coverage run --append --branch --source=clinto `which nosetests` test clinto.tests
 	coverage report --omit='clinto/tests*'
 	coverage xml --omit='clinto/tests*'
