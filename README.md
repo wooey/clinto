@@ -1,6 +1,7 @@
 # clinto
-[![Build Status](https://travis-ci.org/wooey/clinto.svg)](https://travis-ci.org/wooey/clinto)
-[![Coverage Status](https://coveralls.io/repos/wooey/clinto/badge.svg?branch=master&service=github)](https://coveralls.io/github/wooey/clinto?branch=master)
+[![Build Status](https://github.com/wooey/clinto/workflows/Build-and-Test/badge.svg)](https://github.com/wooey/clinto/actions?query=workflow%3ABuild-and-Test)
+[![Deploy-To-Pypi](https://github.com/wooey/clinto/workflows/Deploy-To-Pypi/badge.svg)](https://github.com/wooey/clinto/actions?query=workflow%3ADeploy-To-Pypi)
+[![codecov](https://codecov.io/gh/wooey/clinto/branch/master/graph/badge.svg)](https://codecov.io/gh/wooey/clinto)
 
 [![Join the chat at https://gitter.im/wooey/clinto](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/wooey/clinto?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
