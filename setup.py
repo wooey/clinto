@@ -5,20 +5,19 @@ from setuptools import setup, find_packages
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
-    name='clinto',
-    version='0.3.0',
+    name="clinto",
+    version="0.3.0rc1",
     packages=find_packages(),
     scripts=[],
-    install_requires = ['six',],
+    install_requires=["six"],
     include_package_data=True,
-    description='Clinto',
-    url='http://www.github.com/wooey/clinto',
-    author='Chris Mitchell',
-    author_email='chris.mit7@gmail.com',
+    description="Clinto",
+    url="http://www.github.com/wooey/clinto",
+    author="Chris Mitchell",
+    author_email="chris.mit7@gmail.com",
     classifiers=[
-        'Intended Audience :: Developers',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
+        "Intended Audience :: Developers",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python",
     ],
 )
-
