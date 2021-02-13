@@ -3,8 +3,10 @@ testenv:
 	pip install -e .
 
 test:
-	coverage run --branch --source=clinto --omit=clinto/tests* `which nosetests`
-	coverage report
+	nosetests --with-coverage --cover-erase --cover-branches --cover-package=clinto tests/*
+	coverage run --append --branch --source=clinto `which nosetests` test clinto.tests
+	coverage report --omit='clinto/tests*'
+	coverage xml --omit='clinto/tests*'
 
 clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
 
