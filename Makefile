@@ -3,8 +3,9 @@ testenv:
 	pip install -e .
 
 test:
-	coverage run --branch --source=clinto --omit=clinto/tests* `which nosetests`
-	coverage report
+	nosetests --with-coverage --cover-erase --cover-branches --cover-package=clinto clinto/tests/*
+	coverage report --omit='clinto/tests*'
+	coverage xml --omit='clinto/tests*'
 
 clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
 
@@ -27,8 +28,10 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
 
-release: dist ## package and upload a release
-	twine upload dist/*
+release/major release/minor release/patch release/rc:
+	bumpversion $(@F)
+	git push
+	git push --tags
 
 dist: clean ## builds source and wheel package
 	python setup.py sdist
