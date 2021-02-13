@@ -208,6 +208,11 @@ class TestArgParse(unittest.TestCase):
             },
         )
 
+    def test_zipapp_with_relative_imports(self):
+        script_path = os.path.join(self.script_dir, "zip_app_rel_imports.zip")
+        parser = Parser(script_path=script_path)
+        self.assertIsNotNone(parser.get_script_description())
+
     def test_mutually_exclusive_groups(self):
         script_path = os.path.join(self.script_dir, "mutually_exclusive.py")
         parser = Parser(script_path=script_path)

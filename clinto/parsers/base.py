@@ -1,13 +1,23 @@
 from __future__ import absolute_import
+import copy
 import json
 import os
-import copy
+import sys
+from contextlib import contextmanager
 
 
 def update_dict_copy(a, b):
     temp = copy.deepcopy(a)
     temp.update(b)
     return temp
+
+
+@contextmanager
+def inserted_sys_path(path):
+    if path:
+        sys.path.insert(0, path)
+        yield
+        sys.path.pop(0)
 
 
 class ClintoArgumentParserException(Exception):
@@ -20,10 +30,9 @@ def parse_args_monkeypatch(self, *args, **kwargs):
 
 
 class BaseParser(object):
-
     def __init__(self, script_path=None, script_source=None):
         self.is_valid = False
-        self.error = ''
+        self.error = ""
         self.parser = None
 
         self.script_path = script_path
@@ -35,7 +44,10 @@ class BaseParser(object):
 
         self._heuristic_score = None
 
-        self.extract_parser()
+        with inserted_sys_path(
+            os.path.dirname(self.script_path) if self.script_path else None
+        ):
+            self.extract_parser()
 
         if self.parser is None:
             return
