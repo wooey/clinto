@@ -20,6 +20,7 @@ from .base import (
     ClintoArgumentParserException,
     update_dict_copy,
 )
+from .compat import ParserExceptions
 from .constants import SPECIFY_EVERY_PARAM
 
 
@@ -303,7 +304,7 @@ class ArgParseParser(BaseParser):
         except ClintoArgumentParserException as e:
             # Catch the generated exception, passing the ArgumentParser object
             parsers.append(e.parser)
-        except Exception:
+        except ParserExceptions:
             sys.stderr.write(
                 "Error while trying exception-catch method on {0}:\n".format(
                     self.script_path
