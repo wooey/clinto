@@ -339,16 +339,25 @@ class ArgParseParser(BaseParser):
                 python_code = source_parser.convert_to_python(list(ast_source))
                 f.write(six.b("""
 import builtins
+from types import ModuleType
+
+class DummyModule(ModuleType):
+    def __getattr__(self, key):
+        return None
+    __all__ = []   # support wildcard imports
 
 def tryimport(name, globals={}, locals={}, fromlist=[], level=-1):
     try:
         return realimport(name, globals, locals, fromlist, level)
     except (ImportError, ModuleNotFoundError):
-        pass
+        return DummyModule(name)
 
 realimport, builtins.__import__ = builtins.__import__, tryimport
 """))
                 f.write(six.b("\n".join(python_code)))
+                f.write(six.b("""
+builtins.__import__ = realimport
+"""))
                 f.seek(0)
                 module = imp.load_source("__main__", f.name)
             except Exception:
