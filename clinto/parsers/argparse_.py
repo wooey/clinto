@@ -337,6 +337,17 @@ class ArgParseParser(BaseParser):
             try:
                 ast_source = source_parser.parse_source_file(self.script_path)
                 python_code = source_parser.convert_to_python(list(ast_source))
+                f.write(six.b("""
+import builtins
+
+def tryimport(name, globals={}, locals={}, fromlist=[], level=-1):
+    try:
+        return realimport(name, globals, locals, fromlist, level)
+    except (ImportError, ModuleNotFoundError):
+        pass
+
+realimport, builtins.__import__ = builtins.__import__, tryimport
+"""))
                 f.write(six.b("\n".join(python_code)))
                 f.seek(0)
                 module = imp.load_source("__main__", f.name)
