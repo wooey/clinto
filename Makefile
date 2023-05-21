@@ -3,7 +3,7 @@ testenv:
 	pip install -e .
 
 test:
-	nosetests --with-coverage --cover-erase --cover-branches --cover-package=clinto clinto/tests/*
+	pytest --cov=clinto --cov-config=.coveragerc clinto/tests/*
 	coverage report --omit='clinto/tests*'
 	coverage xml --omit='clinto/tests*'
 
