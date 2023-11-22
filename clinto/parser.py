@@ -8,7 +8,7 @@ parsers = [ArgParseParser, DocOptParser]
 
 
 class Parser(object):
-    def __init__(self, script_path=None, script_name=None):
+    def __init__(self, script_path=None, script_name=None, ignore_bad_imports=False):
         self.parser = None
         self._error = ""
 
@@ -22,7 +22,12 @@ class Parser(object):
             script_source = f.read()
 
         parser_obj = [
-            pc(script_path=script_path, script_source=script_source) for pc in parsers
+            pc(
+                script_path=script_path,
+                script_source=script_source,
+                ignore_bad_imports=ignore_bad_imports,
+            )
+            for pc in parsers
         ]
         parser_obj = sorted(parser_obj, key=lambda x: x.score, reverse=True)
 

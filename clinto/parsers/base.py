@@ -30,10 +30,11 @@ def parse_args_monkeypatch(self, *args, **kwargs):
 
 
 class BaseParser(object):
-    def __init__(self, script_path=None, script_source=None):
+    def __init__(self, script_path=None, script_source=None, ignore_bad_imports=False):
         self.is_valid = False
         self.error = ""
         self.parser = None
+        self.ignore_bad_imports = ignore_bad_imports
 
         self.script_path = script_path
         # We need this for heuristic, may as well happen once
