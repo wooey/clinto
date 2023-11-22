@@ -333,15 +333,15 @@ class ArgParseParser(BaseParser):
                     if issubclass(type(v), argparse.ArgumentParser)
                 ]
         if not parsers:
-            f = tempfile.NamedTemporaryFile()
             try:
-                ast_source = source_parser.parse_source_file(
-                    self.script_path, ignore_bad_imports=self.ignore_bad_imports
-                )
-                python_code = source_parser.convert_to_python(list(ast_source))
-                f.write(six.b("\n".join(python_code)))
-                f.seek(0)
+                with tempfile.NamedTemporaryFile(delete=False) as f:
+                    ast_source = source_parser.parse_source_file(
+                        self.script_path, ignore_bad_imports=self.ignore_bad_imports
+                    )
+                    python_code = source_parser.convert_to_python(list(ast_source))
+                    f.write(six.b("\n".join(python_code)))
                 module = imp.load_source("__main__", f.name)
+                os.remove(f.name)
             except Exception:
                 sys.stderr.write(
                     "Error while converting {0} to ast:\n".format(self.script_path)
