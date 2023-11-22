@@ -9,7 +9,7 @@ setup(
     version="0.5.0",
     packages=find_packages(),
     scripts=[],
-    install_requires=["six"],
+    install_requires=["astor"],
     include_package_data=True,
     description="Clinto",
     url="http://www.github.com/wooey/clinto",

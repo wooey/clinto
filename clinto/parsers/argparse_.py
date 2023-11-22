@@ -10,8 +10,6 @@ import types
 from collections import OrderedDict
 from itertools import chain
 
-import six
-
 from ..ast import source_parser
 from ..utils import is_upload, expand_iterable
 from .base import (
@@ -132,36 +130,18 @@ TYPE_FIELDS = {
 }
 
 
-if six.PY2:
-    TYPE_FIELDS.update(
-        {
-            file: {
-                "model": "FileField",
-                "type": "file",
-                "nullcheck": lambda x: False,
-                "attr_kwargs": GLOBAL_ATTR_KWARGS,
-            },
-            unicode: {
-                "model": "CharField",
-                "type": "text",
-                "nullcheck": lambda x: x.default == "" or x.default is None,
-                "attr_kwargs": GLOBAL_ATTR_KWARGS,
-            },
-        }
-    )
-elif six.PY3:
-    import io
+import io
 
-    TYPE_FIELDS.update(
-        {
-            io.IOBase: {
-                "model": "FileField",
-                "type": "file",
-                "nullcheck": lambda x: False,
-                "attr_kwargs": GLOBAL_ATTR_KWARGS,
-            }
+TYPE_FIELDS.update(
+    {
+        io.IOBase: {
+            "model": "FileField",
+            "type": "file",
+            "nullcheck": lambda x: False,
+            "attr_kwargs": GLOBAL_ATTR_KWARGS,
         }
-    )
+    }
+)
 
 
 # There are cases where we can glean additional information about the form structure, e.g.
@@ -231,7 +211,7 @@ class ArgParseNode(object):
             {"id": mutex_group[0], "title": mutex_group[1]} if mutex_group else {}
         )
         null_check = field_type["nullcheck"](action)
-        for attr, attr_dict in six.iteritems(field_type["attr_kwargs"]):
+        for attr, attr_dict in field_type["attr_kwargs"].items():
             if attr_dict is None:
                 continue
             if attr == "value" and null_check:
@@ -266,9 +246,7 @@ class ArgParseNode(object):
             self.node_attrs["name"],
             field_module,
             self.node_attrs["model"],
-            ", ".join(
-                ["{0}={1}".format(i, v) for i, v in six.iteritems(django_kwargs)]
-            ),
+            ", ".join(["{0}={1}".format(i, v) for i, v in django_kwargs.items()]),
         )
 
 
@@ -327,19 +305,17 @@ class ArgParseParser(BaseParser):
                 )
                 parsers = [
                     v
-                    for i, v in chain(
-                        six.iteritems(main_module), six.iteritems(vars(module))
-                    )
+                    for i, v in chain(main_module.items(), vars(module).items())
                     if issubclass(type(v), argparse.ArgumentParser)
                 ]
         if not parsers:
             try:
-                with tempfile.NamedTemporaryFile(delete=False) as f:
+                with tempfile.NamedTemporaryFile(delete=False, mode="wb") as f:
                     ast_source = source_parser.parse_source_file(
                         self.script_path, ignore_bad_imports=self.ignore_bad_imports
                     )
                     python_code = source_parser.convert_to_python(list(ast_source))
-                    f.write(six.b("\n".join(python_code)))
+                    f.write("\n".join(python_code).encode())
                 module = imp.load_source("__main__", f.name)
                 os.remove(f.name)
             except Exception:
@@ -354,9 +330,7 @@ class ArgParseParser(BaseParser):
                 )
                 parsers = [
                     v
-                    for i, v in chain(
-                        six.iteritems(main_module), six.iteritems(vars(module))
-                    )
+                    for i, v in chain(main_module.items(), vars(module).items())
                     if issubclass(type(v), argparse.ArgumentParser)
                 ]
         if not parsers:
@@ -385,7 +359,7 @@ class ArgParseParser(BaseParser):
         if self.parser._subparsers is not None:
             for action in self.parser._subparsers._actions:
                 if isinstance(action, argparse._SubParsersAction):
-                    for parser_name, parser in six.iteritems(action.choices):
+                    for parser_name, parser in action.choices.items():
                         parsers.append((parser_name, parser))
 
         self.parsers = OrderedDict()
@@ -407,10 +381,8 @@ class ArgParseParser(BaseParser):
                 # The action is the subparser
                 if isinstance(action, argparse._SubParsersAction):
                     continue
-                if (
-                    self.script_version is None
-                    and six.PY3
-                    and isinstance(action, argparse._VersionAction)
+                if self.script_version is None and isinstance(
+                    action, argparse._VersionAction
                 ):
                     self.script_version = action.version
                     continue
@@ -439,11 +411,11 @@ class ArgParseParser(BaseParser):
             "inputs": input_dict,
         }
 
-        for parser_name, parser_info in six.iteritems(self.parsers):
+        for parser_name, parser_info in self.parsers.items():
             parser_actions = []
             input_dict[parser_name] = parser_actions
             containers, parser_nodes = parser_info["containers"], parser_info["nodes"]
-            for container_name, container_nodes in six.iteritems(containers):
+            for container_name, container_nodes in containers.items():
                 parser_actions.append(
                     {
                         "group": container_name,

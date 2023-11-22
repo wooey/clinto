@@ -11,14 +11,14 @@ import ast
 import _ast
 from itertools import *
 
-from . import codegen
+import astor
 
 
 def find_valid_imports(imports):
     valid_imports = []
     for import_module in imports:
         try:
-            exec(codegen.to_source(import_module))
+            exec(astor.to_source(import_module))
         except (ImportError, ModuleNotFoundError):
             pass
         else:
@@ -170,4 +170,4 @@ def convert_to_python(ast_source):
     """
     Converts the ast objects back into human readable Python code
     """
-    return map(codegen.to_source, ast_source)
+    return map(astor.to_source, ast_source)
