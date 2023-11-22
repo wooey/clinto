@@ -182,6 +182,32 @@ class TestArgParse(unittest.TestCase):
         parser = Parser(script_path=script_path)
         self.assertEquals("", parser.error)
 
+    def test_can_exclude_bad_imports(self):
+        script_path = os.path.join(self.script_dir, "error_script.py")
+        parser = Parser(script_path=script_path, ignore_bad_imports=True)
+        self.assertEquals("", parser.error)
+        script_params = parser.get_script_description()
+        self.assertDictEqual(
+            script_params["inputs"][""][0],
+            {
+                "group": "optional arguments",
+                "nodes": [
+                    {
+                        "model": "CharField",
+                        "type": "text",
+                        "mutex_group": {},
+                        "name": "foo",
+                        "required": False,
+                        "help": None,
+                        "param": "-foo",
+                        "param_action": set(),
+                        "choices": None,
+                        "choice_limit": None,
+                    }
+                ],
+            },
+        )
+
     def test_zipapp(self):
         script_path = os.path.join(self.script_dir, "data_reader.zip")
         parser = Parser(script_path=script_path)

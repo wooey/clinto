@@ -202,7 +202,7 @@ ACTION_CLASS_TO_TYPE_FIELD = {
 
 class ArgParseNode(object):
     """
-     This class takes an argument parser entry and assigns it to a Build spec
+    This class takes an argument parser entry and assigns it to a Build spec
     """
 
     def __init__(self, action=None, mutex_group=None):
@@ -250,7 +250,7 @@ class ArgParseNode(object):
 
     def to_django(self):
         """
-         This is a debug function to see what equivalent django models are being generated
+        This is a debug function to see what equivalent django models are being generated
         """
         exclude = {"name", "model"}
         field_module = "models"
@@ -262,7 +262,7 @@ class ArgParseNode(object):
             django_kwargs["default"] = self.node_attrs["value"]
         except KeyError:
             pass
-        return u"{0} = {1}.{2}({3})".format(
+        return "{0} = {1}.{2}({3})".format(
             self.node_attrs["name"],
             field_module,
             self.node_attrs["model"],
@@ -335,7 +335,9 @@ class ArgParseParser(BaseParser):
         if not parsers:
             f = tempfile.NamedTemporaryFile()
             try:
-                ast_source = source_parser.parse_source_file(self.script_path)
+                ast_source = source_parser.parse_source_file(
+                    self.script_path, ignore_bad_imports=self.ignore_bad_imports
+                )
                 python_code = source_parser.convert_to_python(list(ast_source))
                 f.write(six.b("\n".join(python_code)))
                 f.seek(0)
