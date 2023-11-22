@@ -1,3 +1,4 @@
+import argparse
 import os
 import unittest
 
@@ -7,6 +8,9 @@ from clinto.version import PY_MINOR_VERSION, PY36
 from clinto.parsers.argparse_ import ArgParseNode, expand_iterable, ArgParseParser
 from clinto.parsers.constants import SPECIFY_EVERY_PARAM
 from clinto.parser import Parser
+
+_parser = argparse.ArgumentParser()
+OPTIONAL_TITLE = _parser._optionals.title
 
 
 class TestArgParse(unittest.TestCase):
@@ -31,7 +35,7 @@ class TestArgParse(unittest.TestCase):
         main_parser = description["inputs"][""]
         main_parser_group1 = main_parser[0]
         self.assertEqual(main_parser_group1["nodes"][0]["name"], "test_arg")
-        self.assertEqual(main_parser_group1["group"], "optional arguments")
+        self.assertEqual(main_parser_group1["group"], OPTIONAL_TITLE)
 
         subparser1 = description["inputs"]["subparser1"]
         subparser_group1 = subparser1[0]
@@ -191,7 +195,7 @@ class TestArgParse(unittest.TestCase):
         self.assertDictEqual(
             script_params["inputs"][""][0],
             {
-                "group": "optional arguments",
+                "group": OPTIONAL_TITLE,
                 "nodes": [
                     {
                         "model": "CharField",
@@ -231,7 +235,7 @@ class TestArgParse(unittest.TestCase):
                         "mutex_group": {},
                     }
                 ],
-                "group": "optional arguments",
+                "group": OPTIONAL_TITLE,
             },
         )
 
@@ -301,7 +305,7 @@ class TestArgParse(unittest.TestCase):
                         "checked": True,
                     },
                 ],
-                "group": "optional arguments",
+                "group": OPTIONAL_TITLE,
             },
         )
 
