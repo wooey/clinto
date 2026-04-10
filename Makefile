@@ -34,6 +34,5 @@ release/major release/minor release/patch release/rc:
 	git push --tags
 
 dist: clean ## builds source and wheel package
-	python setup.py sdist
-	python setup.py bdist_wheel
+	python -m build
 	ls -l dist
