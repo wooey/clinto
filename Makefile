@@ -4,8 +4,8 @@ testenv:
 
 test:
 	pytest --cov=clinto --cov-config=.coveragerc clinto/tests/*
-	coverage report --omit='clinto/tests*'
-	coverage xml --omit='clinto/tests*'
+	python -m coverage report --omit='clinto/tests*'
+	python -m coverage xml --omit='clinto/tests*'
 
 clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
 

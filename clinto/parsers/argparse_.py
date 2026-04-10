@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 import argparse
 import json
-import imp
 import os
 import sys
 import tempfile
@@ -16,6 +15,7 @@ from .base import (
     BaseParser,
     parse_args_monkeypatch,
     ClintoArgumentParserException,
+    load_module_from_path,
     update_dict_copy,
 )
 from .compat import ParserExceptions
@@ -294,7 +294,7 @@ class ArgParseParser(BaseParser):
 
         if not parsers:
             try:
-                module = imp.load_source("__name__", self.script_path)
+                module = load_module_from_path("__name__", self.script_path)
             except Exception:
                 sys.stderr.write("Error while loading {0}:\n".format(self.script_path))
                 errors["source-loader"] = "{0}\n".format(traceback.format_exc())
@@ -316,7 +316,7 @@ class ArgParseParser(BaseParser):
                     )
                     python_code = source_parser.convert_to_python(list(ast_source))
                     f.write("\n".join(python_code).encode())
-                module = imp.load_source("__main__", f.name)
+                module = load_module_from_path("__main__", f.name)
                 os.remove(f.name)
             except Exception:
                 sys.stderr.write(
