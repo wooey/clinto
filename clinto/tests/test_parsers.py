@@ -183,13 +183,13 @@ class TestArgParse(unittest.TestCase):
 
         script_path = os.path.join(self.script_dir, "choices.py")
         parser = Parser(script_path=script_path)
-        self.assertEquals("", parser.error)
+        self.assertEqual("", parser.error)
 
     def test_can_exclude_bad_imports(self):
         self.maxDiff = None
         script_path = os.path.join(self.script_dir, "error_script.py")
         parser = Parser(script_path=script_path, ignore_bad_imports=True)
-        self.assertEquals("", parser.error)
+        self.assertEqual("", parser.error)
         script_params = parser.get_script_description()
         self.assertDictEqual(
             script_params["inputs"][""][0],

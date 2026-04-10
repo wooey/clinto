@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 import copy
+import importlib.machinery
+import importlib.util
 import json
 import os
 import sys
@@ -27,6 +29,36 @@ class ClintoArgumentParserException(Exception):
 
 def parse_args_monkeypatch(self, *args, **kwargs):
     raise ClintoArgumentParserException(self)
+
+
+def load_module_from_path(module_name, path):
+    spec = importlib.util.spec_from_file_location(module_name, path)
+    if spec is None or spec.loader is None:
+        loader = importlib.machinery.SourceFileLoader(module_name, path)
+        spec = importlib.util.spec_from_loader(module_name, loader)
+
+    if spec is None or spec.loader is None:
+        raise ImportError("Unable to load module {0} from {1}".format(module_name, path))
+
+    module = importlib.util.module_from_spec(spec)
+    previous_module = sys.modules.get(module_name)
+    sys.modules[module_name] = module
+
+    try:
+        spec.loader.exec_module(module)
+    except Exception:
+        if previous_module is None:
+            sys.modules.pop(module_name, None)
+        else:
+            sys.modules[module_name] = previous_module
+        raise
+
+    if previous_module is None:
+        sys.modules.pop(module_name, None)
+    else:
+        sys.modules[module_name] = previous_module
+
+    return module
 
 
 class BaseParser(object):

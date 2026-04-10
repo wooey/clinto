@@ -3,10 +3,10 @@ from __future__ import absolute_import
 import sys
 import os
 import json
-import imp
 import inspect
 import tempfile
 import traceback
+import types
 from collections import OrderedDict
 from itertools import chain
 from ..ast import source_parser
@@ -116,7 +116,7 @@ class DocOptParser(BaseParser):
             return False
 
         try:
-            module = imp.new_module("__name__")
+            module = types.ModuleType("__name__")
             exec(self.script_source, module.__dict__)
 
         except Exception:
