@@ -1,5 +1,6 @@
 import sys
 
+
 # TODO: Move this stuff to a utils file
 def is_upload(action):
     """Checks if this should be a user upload

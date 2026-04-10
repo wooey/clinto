@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import argparse
+import io
 import json
 import os
 import sys
@@ -118,7 +119,7 @@ TYPE_FIELDS = {
                     or x.default in (sys.stdout, sys.stdin)
                 },
                 "upload": {"callback": is_upload},
-            }
+            },
         ),
     },
     types.FunctionType: {
@@ -128,10 +129,6 @@ TYPE_FIELDS = {
         "attr_kwargs": GLOBAL_ATTR_KWARGS,
     },
 }
-
-
-import io
-
 TYPE_FIELDS.update(
     {
         io.IOBase: {

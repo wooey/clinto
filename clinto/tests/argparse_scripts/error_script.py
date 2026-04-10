@@ -1,5 +1,6 @@
 import argparse
-import something_i_dont_have
+import sys
+import something_i_dont_have  # noqa: F401
 
 parser = argparse.ArgumentParser(description="Something")
 parser.add_argument("-foo")

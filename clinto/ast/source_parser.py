@@ -3,13 +3,13 @@ Created on Dec 11, 2013
 
 @author: Chris
 
-Collection of functions for extracting argparse related statements from the 
+Collection of functions for extracting argparse related statements from the
 client code.
 """
 
 import ast
 import _ast
-from itertools import *
+from itertools import chain
 
 import astor
 

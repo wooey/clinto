@@ -18,6 +18,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
+    "Programming Language :: Python :: 3.14",
 ]
 
 [project.urls]
@@ -50,6 +51,21 @@ serialize = [
 [tool.bumpversion.parts.rc]
 first_value = "1"
 
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = """
+[project]
+name = "clinto"
+version = "{current_version}"
+description = "Clinto"
+"""
+replace = """
+[project]
+name = "clinto"
+version = "{new_version}"
+description = "Clinto"
+"""
+
 [tool.ruff]
 exclude = [".git", ".tox", "__pycache__", "build", "dist"]
 line-length = 88
@@ -60,23 +76,12 @@ select = ["E", "F", "W"]
 ignore = [
     "E111",
     "E114",
-    "E121",
-    "E122",
-    "E124",
-    "E125",
-    "E126",
-    "E127",
-    "E128",
-    "E129",
-    "E131",
     "E203",
     "E231",
     "E265",
     "E501",
     "E731",
     "F841",
-    "W503",
-    "W504",
 ]
 
 [tool.ruff.format]

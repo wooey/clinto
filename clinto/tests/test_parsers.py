@@ -4,7 +4,7 @@ import unittest
 
 from . import factories
 from clinto.version import PY_MINOR_VERSION, PY36
-from clinto.parsers.argparse_ import ArgParseNode, expand_iterable, ArgParseParser
+from clinto.parsers.argparse_ import ArgParseNode, expand_iterable
 from clinto.parsers.constants import SPECIFY_EVERY_PARAM
 from clinto.parser import Parser
 

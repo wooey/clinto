@@ -4,18 +4,11 @@ import sys
 import os
 import json
 import inspect
-import tempfile
 import traceback
 import types
 from collections import OrderedDict
-from itertools import chain
-from ..ast import source_parser
-from ..utils import is_upload, expand_iterable
 from .base import (
     BaseParser,
-    parse_args_monkeypatch,
-    ClintoArgumentParserException,
-    update_dict_copy,
 )
 
 try:
@@ -80,17 +73,17 @@ class DocOptNode(object):
         if field_type is None:
             field_types = [
                 i
-                for i in fields.keys()
+                for i in TYPE_FIELDS.keys()
                 if i is not None and issubclass(type(option.type), i)
             ]
             if len(field_types) > 1:
                 field_types = [
                     i
-                    for i in fields.keys()
+                    for i in TYPE_FIELDS.keys()
                     if i is not None and isinstance(option.type, i)
                 ]
             if len(field_types) == 1:
-                field_type = fields[field_types[0]]
+                field_type = TYPE_FIELDS[field_types[0]]
         self.node_attrs = dict([(i, field_type[i]) for i in GLOBAL_ATTRS])
         self.node_attrs["name"] = name
         self.node_attrs["param"] = option.long if option.long else option.short
