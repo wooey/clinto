@@ -53,7 +53,7 @@ first_value = "1"
 [tool.ruff]
 exclude = [".git", ".tox", "__pycache__", "build", "dist"]
 line-length = 88
-target-version = "py37"
+target-version = "py314"
 
 [tool.ruff.lint]
 select = ["E", "F", "W"]
